@@ -7,8 +7,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = "textbooks")
 public class Textbook {
     @Id
+    @Field("_id")
     private String id;
-    @Field("textbook_id")
+    @Field("id")
     private Integer textbookId;
     private String title;
     private String slug;
