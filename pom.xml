@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>lt.mknyga</groupId>
-    <artifactId>textbook_service</artifactId>
+    <artifactId>textbooks</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>textbook_service</name>
     <description>textbook_service</description>

@@ -1,4 +1,4 @@
-package lt.mknyga.textbook_service;
+package lt.mknyga.textbooks;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
