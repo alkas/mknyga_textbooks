@@ -2,14 +2,18 @@ package lt.mknyga.textbooks.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
 @Document(collection = "topics")
 public class Topic {
     @Id
+    @Field("_id")
     private String id;
+    @Field("textbook_id")
     private Integer textbookId;
+    @Field("section_id")
     private Integer sectionId;
     private List<String> achievements;
     private List<String> competencies;
