@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface SectionRepository extends MongoRepository<Section, String> {
-    //Optional<Section> findBySectionId(Integer sectionId);
-    //Optional<Section> findByTextbookIdAndSectionId(Integer textbookId, Integer sectionId);
-    //boolean existsBySectionId(Integer sectionId);
+    Optional<Section> findBySectionId(Integer sectionId);
+    Optional<Section> findByTextbookIdAndSectionId(Integer textbookId, Integer sectionId);
+    boolean existsBySectionId(Integer sectionId);
 
     List<Section> findByTextbookId(Integer textbookId);
 }

@@ -20,6 +20,7 @@ public class Topic {
     private List<String> criteria;
     private Integer lessons;
     private List<Material> materials;
+    @Field("order_no")
     private Integer orderNo;
     private List<String> pages;
     private List<String> mk;
