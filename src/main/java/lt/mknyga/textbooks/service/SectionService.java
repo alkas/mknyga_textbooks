@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface SectionService {
     List<SectionDTO> findByTextbookId(Integer textbookId);
+    SectionDTO findBySectionId(Integer sectionId);
     SectionDTO create(Section section);
     SectionDTO update(String id, Section section);
     void delete(String id);

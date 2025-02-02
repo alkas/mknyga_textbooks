@@ -1,7 +1,7 @@
 package lt.mknyga.textbooks.service.impl;
 
 import lt.mknyga.textbooks.dto.SectionDTO;
-import lt.mknyga.textbooks.dto.TextbookListDTO;
+import lt.mknyga.textbooks.dto.TopicDTO;
 import lt.mknyga.textbooks.dto.TopicDetailDTO;
 import lt.mknyga.textbooks.dto.TopicListDTO;
 import lt.mknyga.textbooks.model.Section;
@@ -33,20 +33,35 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public List<TopicListDTO> findBySectionId(Integer sectionId) {
+    public List<TopicDTO> findByTextbookId(Integer textbookId) {
+        if (!textbookRepository.existsByTextbookId(textbookId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found");
+        }
+        return topicRepository.findBySectionId(sectionId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TopicDTO> findBySectionId(Integer sectionId) {
         if (!sectionRepository.existsBySectionId(sectionId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found");
         }
         return topicRepository.findBySectionId(sectionId)
                 .stream()
-                .map(this::convertToListDTO)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
     @Override
-    public TopicDetailDTO findById(String id) {
-        Topic topic = topicRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Topic not found"));
+    public TopicDetailDTO findItemById(String id) {
+        System.out.println("Getting topic by id: " + id);
+        Topic topic = topicRepository.findByTopicId(id)
+                .orElseThrow(() -> {
+                    System.out.println("Topic npot found by id: " + id);
+                    return new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Topic not found");
+                        });
 
         Section section = sectionRepository.findBySectionId(topic.getSectionId())
                 .orElseThrow(() -> new ResponseStatusException(
@@ -100,23 +115,12 @@ public class TopicServiceImpl implements TopicService {
         topicRepository.deleteById(id);
     }
 
-    private TopicListDTO convertToListDTO(Topic topic) {
-        TopicListDTO dto = new TopicListDTO();
-        dto.setId(topic.getId());
-        dto.setTitle(topic.getTitle());
-        dto.setOrderNo(topic.getOrderNo());
-        dto.setPages(topic.getPages());
-        dto.setPractice(topic.getPractice());
-        dto.setLessons(topic.getLessons());
-        return dto;
-    }
-
-    private TopicDetailDTO convertToDetailDTO(Topic topic, Section section, Textbook textbook) {
-        TopicDetailDTO dto = new TopicDetailDTO();
+    private TopicDTO convertToDTO(Topic topic, Section section, Textbook textbook) {
+        TopicDTO dto = new TopicDTO();
         // Basic topic fields
         dto.setId(topic.getId());
+        dto.getTopicId(topic.getTopicId());
         dto.setTitle(topic.getTitle());
-        dto.setOrderNo(topic.getOrderNo());
         dto.setPages(topic.getPages());
         dto.setPractice(topic.getPractice());
         dto.setLessons(topic.getLessons());
@@ -125,7 +129,6 @@ public class TopicServiceImpl implements TopicService {
         dto.setAchievements(topic.getAchievements());
         dto.setCompetencies(topic.getCompetencies());
         dto.setCriteria(topic.getCriteria());
-        dto.setMk(topic.getMk());
         dto.setTasks(topic.getTasks());
 
         // Convert materials
@@ -143,15 +146,15 @@ public class TopicServiceImpl implements TopicService {
         dto.setSection(sectionDTO);
 
         // Set textbook
-        TextbookListDTO textbookDTO = new TextbookListDTO();
-        textbookDTO.setId(textbook.getId());
-        textbookDTO.setTextbookId(textbook.getTextbookId());
-        textbookDTO.setTitle(textbook.getTitle());
-        textbookDTO.setSlug(textbook.getSlug());
-        textbookDTO.setGrade(textbook.getGrade());
-        textbookDTO.setSubject(textbook.getSubject());
-        textbookDTO.setPublished(textbook.getPublished());
-        dto.setTextbook(textbookDTO);
+        //TextbookListDTO textbookDTO = new TextbookListDTO();
+        //textbookDTO.setId(textbook.getId());
+        //textbookDTO.setTextbookId(textbook.getTextbookId());
+        //textbookDTO.setTitle(textbook.getTitle());
+        //textbookDTO.setSlug(textbook.getSlug());
+        //textbookDTO.setGrade(textbook.getGrade());
+        //textbookDTO.setSubject(textbook.getSubject());
+        //textbookDTO.setPublished(textbook.getPublished());
+        //dto.setTextbook(textbookDTO);
 
         return dto;
     }

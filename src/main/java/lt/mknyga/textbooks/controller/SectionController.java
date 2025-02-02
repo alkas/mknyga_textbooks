@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sections")
+@RequestMapping("/api")
 public class SectionController {
     private final SectionService sectionService;
 
@@ -18,10 +18,20 @@ public class SectionController {
         this.sectionService = sectionService;
     }
 
-    @GetMapping("/textbook/{textbookId}")
+    @GetMapping("/textbook/{textbookId}/sections")
     public ResponseEntity<List<SectionDTO>> getSectionsByTextbook(
             @PathVariable Integer textbookId) {
         return ResponseEntity.ok(sectionService.findByTextbookId(textbookId));
+    }
+
+    @GetMapping("/section2/{id}")
+    public ResponseEntity<SectionDTO> getSectionById(@PathVariable String id) {
+        return ResponseEntity.ok(sectionService.findById(id));
+    }
+
+    @GetMapping("/section/{sectionId}")
+    public ResponseEntity<SectionDTO> getSectionBySectionId(@PathVariable Integer sectionId) {
+        return ResponseEntity.ok(sectionService.findBySectionId(sectionId));
     }
 
     @PostMapping

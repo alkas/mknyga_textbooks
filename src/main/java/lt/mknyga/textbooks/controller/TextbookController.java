@@ -30,7 +30,7 @@ public class TextbookController {
     public ResponseEntity<TextbookDetailDTO> getTextbook(
             @PathVariable String id,
             @RequestParam(defaultValue = "false") boolean includeTopics) {
-        return ResponseEntity.ok(textbookService.findById(id, includeTopics));
+        return ResponseEntity.ok(textbookService.findByTextbookId(id, includeTopics));
     }
 
     @PostMapping

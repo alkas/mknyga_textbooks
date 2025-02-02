@@ -27,7 +27,7 @@ public class TopicController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TopicDetailDTO> getTopic(@PathVariable String id) {
-        return ResponseEntity.ok(topicService.findById(id));
+        return ResponseEntity.ok(topicService.findItemById(id));
     }
 
     @PostMapping

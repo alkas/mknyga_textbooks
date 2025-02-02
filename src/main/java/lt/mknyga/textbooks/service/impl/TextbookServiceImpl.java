@@ -1,6 +1,7 @@
 package lt.mknyga.textbooks.service.impl;
 
 import lt.mknyga.textbooks.dto.SectionDTO;
+import lt.mknyga.textbooks.dto.TextbookDTO;
 import lt.mknyga.textbooks.dto.TextbookDetailDTO;
 import lt.mknyga.textbooks.dto.TextbookListDTO;
 import lt.mknyga.textbooks.model.Section;
@@ -35,10 +36,10 @@ public class TextbookServiceImpl implements TextbookService {
     }
 
     @Override
-    public TextbookDetailDTO findById(String id, boolean includeTopics) {
+    public TextbookDTO findByTextbookId(Integer textbookId, boolean includeTopics) {
         //logger.debug("Finding textbook with id: {}", id);
 
-        Textbook textbook = textbookRepository.findById(id)
+        Textbook textbook = textbookRepository.findById(textbookId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Textbook not found"));
 

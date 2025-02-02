@@ -9,12 +9,11 @@ import java.util.Optional;
 
 @Repository
 public interface TextbookRepository extends MongoRepository<Textbook, String> {
+    List<Textbook> findByGradeAndSubject(Integer grade, String subject);
     Optional<Textbook> findByTextbookId(Integer textbookId);
-    List<Textbook> findByGrade(Integer grade);
-    List<Textbook> findBySubject(String subject);
-    Optional<Textbook> findBySlug(String slug);
+    //List<Textbook> findByGrade(Integer grade);
+    //List<Textbook> findBySubject(String subject);
+    //Optional<Textbook> findBySlug(String slug);
     boolean existsByTextbookId(Integer textbookId);
 
-    List<Textbook> findByGradeAndSubject(Integer grade, String subject);
-    Optional<Textbook> findById(String id);
 }
