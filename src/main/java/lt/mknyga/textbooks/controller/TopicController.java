@@ -1,6 +1,6 @@
 package lt.mknyga.textbooks.controller;
 
-import lt.mknyga.textbooks.dto.TopicDetailDTO;
+import lt.mknyga.textbooks.dto.TopicDTO;
 import lt.mknyga.textbooks.dto.TopicListDTO;
 import lt.mknyga.textbooks.model.Topic;
 import lt.mknyga.textbooks.service.TopicService;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/topics")
+@RequestMapping("/api")
 public class TopicController {
     private final TopicService topicService;
 
@@ -19,30 +19,36 @@ public class TopicController {
         this.topicService = topicService;
     }
 
-    @GetMapping("/section/{sectionId}")
+    @GetMapping("/section_topics/{sectionId}")
     public ResponseEntity<List<TopicListDTO>> getTopicsBySection(
             @PathVariable Integer sectionId) {
         return ResponseEntity.ok(topicService.findBySectionId(sectionId));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TopicDetailDTO> getTopic(@PathVariable String id) {
-        return ResponseEntity.ok(topicService.findItemById(id));
+    @GetMapping("/textbook_topics/{textbookId}")
+    public ResponseEntity<List<TopicListDTO>> getTopicsByTextbook(
+            @PathVariable Integer textbookId) {
+        return ResponseEntity.ok(topicService.findByTextbookId(textbookId));
     }
 
-    @PostMapping
-    public ResponseEntity<TopicDetailDTO> createTopic(@RequestBody Topic topic) {
+    @GetMapping("/topic/{topicId}")
+    public ResponseEntity<TopicDTO> getTopic(@PathVariable Integer topicId) {
+        return ResponseEntity.ok(topicService.findByTopicId(topicId));
+    }
+
+    @PostMapping("/topics")
+    public ResponseEntity<TopicDTO> createTopic(@RequestBody Topic topic) {
         return new ResponseEntity<>(topicService.create(topic), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TopicDetailDTO> updateTopic(
+    @PutMapping("/topics/{id}")
+    public ResponseEntity<TopicDTO> updateTopic(
             @PathVariable String id,
             @RequestBody Topic topic) {
         return ResponseEntity.ok(topicService.update(id, topic));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/topics/{id}")
     public ResponseEntity<Void> deleteTopic(@PathVariable String id) {
         topicService.delete(id);
         return ResponseEntity.noContent().build();

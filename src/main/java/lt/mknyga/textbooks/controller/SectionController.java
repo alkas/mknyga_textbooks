@@ -18,15 +18,10 @@ public class SectionController {
         this.sectionService = sectionService;
     }
 
-    @GetMapping("/textbook/{textbookId}/sections")
+    @GetMapping("/textbook_sections/{textbookId}")
     public ResponseEntity<List<SectionDTO>> getSectionsByTextbook(
             @PathVariable Integer textbookId) {
         return ResponseEntity.ok(sectionService.findByTextbookId(textbookId));
-    }
-
-    @GetMapping("/section2/{id}")
-    public ResponseEntity<SectionDTO> getSectionById(@PathVariable String id) {
-        return ResponseEntity.ok(sectionService.findById(id));
     }
 
     @GetMapping("/section/{sectionId}")
@@ -34,19 +29,19 @@ public class SectionController {
         return ResponseEntity.ok(sectionService.findBySectionId(sectionId));
     }
 
-    @PostMapping
+    @PostMapping("/sections")
     public ResponseEntity<SectionDTO> createSection(@RequestBody Section section) {
         return new ResponseEntity<>(sectionService.create(section), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/sections/{id}")
     public ResponseEntity<SectionDTO> updateSection(
             @PathVariable String id,
             @RequestBody Section section) {
         return ResponseEntity.ok(sectionService.update(id, section));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/sections/{id}")
     public ResponseEntity<Void> deleteSection(@PathVariable String id) {
         sectionService.delete(id);
         return ResponseEntity.noContent().build();

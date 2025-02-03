@@ -34,12 +34,6 @@ public class SectionServiceImpl implements SectionService {
                 .collect(Collectors.toList());
     }
 
-    public SectionDTO findById(String id) {
-        Section section = sectionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found"));
-        return convertToDTO(section);
-    }
-
     public SectionDTO findBySectionId(Integer sectionId) {
         Section section = sectionRepository.findBySectionId(sectionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found"));
@@ -86,6 +80,7 @@ public class SectionServiceImpl implements SectionService {
         dto.setSectionId(section.getSectionId());
         dto.setTextbookId(section.getTextbookId());
         dto.setTitle(section.getTitle());
+        dto.setBookNo(section.getBookNo());
         return dto;
     }
 }
