@@ -2,6 +2,7 @@ package lt.mknyga.textbooks.service.impl;
 
 import lt.mknyga.textbooks.dto.SectionDTO;
 import lt.mknyga.textbooks.dto.TextbookDTO;
+import lt.mknyga.textbooks.dto.TextbookListDTO;
 import lt.mknyga.textbooks.dto.TopicListDTO;
 import lt.mknyga.textbooks.model.Section;
 import lt.mknyga.textbooks.model.Textbook;
@@ -34,34 +35,34 @@ public class TextbookServiceImpl implements TextbookService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TextbookDTO> findByGradeAndSubject(Integer grade, String subject) {
+    public List<TextbookListDTO> findByGradeAndSubject(Integer grade, String subject) {
         return textbookRepository.findByGradeAndSubject(grade, subject)
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::convertToListDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<TextbookDTO> findByGrade(Integer grade) {
+    public List<TextbookListDTO> findByGrade(Integer grade) {
         return textbookRepository.findByGrade(grade)
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::convertToListDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<TextbookDTO> findBySubject(String subject) {
+    public List<TextbookListDTO> findBySubject(String subject) {
         return textbookRepository.findBySubject(subject)
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::convertToListDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<TextbookDTO> findBySlug(String slug) {
+    public List<TextbookListDTO> findBySlug(String slug) {
         return textbookRepository.findBySlug(slug)
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::convertToListDTO)
                 .collect(Collectors.toList());
     }
 
@@ -73,22 +74,15 @@ public class TextbookServiceImpl implements TextbookService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Textbook not found"));
 
-        TextbookDTO detailDTO = convertToDTO(textbook);
-
-
-        if (includeTopics) {
-            List<Section> sections = sectionRepository.findByTextbookId(textbookId);
-            detailDTO.setSections(sections.stream()
-                    .map(this::convertToSectionDTO)
-                    .collect(Collectors.toList()));
-
-            List<Topic> topics = topicRepository.findByTextbookId(textbookId);
-            detailDTO.setTopics(topics.stream()
-                    .map(this::convertToTopicListDTO)
-                    .collect(Collectors.toList()));
-
+        if (!includeTopics) {
+            return convertToDTO(textbook, null, null);
         }
-        return detailDTO;
+
+        List<Section> sections = sectionRepository.findByTextbookId(textbookId);
+
+        List<Topic> topics = topicRepository.findByTextbookId(textbookId);
+
+        return convertToDTO(textbook, sections, topics);
     }
 
     @Override
@@ -98,17 +92,36 @@ public class TextbookServiceImpl implements TextbookService {
                     "Textbook with this ID already exists");
         }
         Textbook savedTextbook = textbookRepository.save(textbook);
-        return convertToDTO(savedTextbook);
+        return convertToDTO(savedTextbook, null, null);
     }
 
     @Override
-    public TextbookDTO update(String id, Textbook textbook) {
-        if (!textbookRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found");
+    public TextbookDTO update(String id, Textbook updatedTextbook) {
+        // Find the existing topic
+        Textbook existingTextbook = textbookRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found"));
+
+        // Update only the non-null fields from the request
+        if (updatedTextbook.getTitle() != null) {
+            existingTextbook.setTitle(updatedTextbook.getTitle());
         }
-        textbook.setId(id);
-        Textbook updatedTextbook = textbookRepository.save(textbook);
-        return convertToDTO(updatedTextbook);
+        if (updatedTextbook.getSubject() != null) {
+            existingTextbook.setSubject(updatedTextbook.getSubject());
+        }
+        if (updatedTextbook.getSlug() != null) {
+            existingTextbook.setSlug(updatedTextbook.getSlug());
+        }
+        if (updatedTextbook.getGrade() != null) {
+            existingTextbook.setGrade(updatedTextbook.getGrade());
+        }
+        if (updatedTextbook.getPublished() != null) {
+            existingTextbook.setPublished(updatedTextbook.getPublished());
+        }
+
+        // Save the updated textbook
+        Textbook savedTextbook = textbookRepository.save(existingTextbook);
+
+        return convertToDTO(savedTextbook, null, null);
     }
 
     @Override
@@ -119,8 +132,36 @@ public class TextbookServiceImpl implements TextbookService {
         textbookRepository.deleteById(id);
     }
 
-    private TextbookDTO convertToDTO(Textbook textbook) {
+    private TextbookListDTO convertToListDTO(Textbook textbook) {
+        TextbookListDTO listDto = new TextbookListDTO();
+        listDto.setTextbookId(textbook.getTextbookId());
+        listDto.setId(textbook.getId());
+        listDto.setTitle(textbook.getTitle());
+        listDto.setSlug(textbook.getSlug());
+        listDto.setGrade(textbook.getGrade());
+        listDto.setSubject(textbook.getSubject());
+        listDto.setPublished(textbook.getPublished());
+
+        return listDto;
+    }
+
+    private TextbookDTO convertToDTO(Textbook textbook, List<Section> sections, List<Topic> topics) {
         TextbookDTO dto = new TextbookDTO();
+        // set basic fields
+        setBasicTextbookFields(dto, textbook);
+
+        // set related fields
+        if (sections != null) {
+            dto.setSections(sections.stream().map(this::convertToSectionDTO).collect(Collectors.toList()));
+        }
+        if (topics != null) {
+            dto.setTopics(topics.stream().map(this::convertToTopicListDTO).collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
+
+    private void setBasicTextbookFields(TextbookDTO dto, Textbook textbook) {
         dto.setId(textbook.getId());
         dto.setTextbookId(textbook.getTextbookId());
         dto.setTitle(textbook.getTitle());
@@ -128,7 +169,6 @@ public class TextbookServiceImpl implements TextbookService {
         dto.setGrade(textbook.getGrade());
         dto.setSubject(textbook.getSubject());
         dto.setPublished(textbook.getPublished());
-        return dto;
     }
 
     private SectionDTO convertToSectionDTO(Section section) {

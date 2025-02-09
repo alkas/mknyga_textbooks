@@ -1,14 +1,14 @@
 package lt.mknyga.textbooks.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "textbooks")
 public class Textbook {
     @Id
     private String id;
-    @Field("textbook_id")
+    @Indexed(unique = true)
     private Integer textbookId;
     private String title;
     private String slug;

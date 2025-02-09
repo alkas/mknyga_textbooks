@@ -15,5 +15,5 @@ public interface TextbookRepository extends MongoRepository<Textbook, String> {
     List<Textbook> findBySubject(String subject);
     List<Textbook> findBySlug(String slug);
     boolean existsByTextbookId(Integer textbookId);
-    boolean existsById(String id);
+    //boolean existsById(String id);
 }
