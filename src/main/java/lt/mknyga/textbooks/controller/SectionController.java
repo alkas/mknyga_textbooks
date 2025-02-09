@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1")
 public class SectionController {
     private final SectionService sectionService;
 
@@ -30,8 +31,8 @@ public class SectionController {
     }
 
     @PostMapping("/sections")
-    public ResponseEntity<ApiResponse<SectionDTO>> createSection(@RequestBody Section section) {
-        return new ResponseEntity<>(new ApiResponse<>(sectionService.create(section)), HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<List<SectionDTO>>> createSection(@RequestBody List<Section> sections) {
+        return new ResponseEntity<>(new ApiResponse<>(sectionService.createBatch(sections)), HttpStatus.CREATED);
     }
 
     @PutMapping("/sections/{id}")

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,29 +42,53 @@ public class SectionServiceImpl implements SectionService {
     }
 
     @Override
-    public SectionDTO create(Section section) {
-        if (!textbookRepository.existsByTextbookId(section.getTextbookId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found");
+    public List<SectionDTO> createBatch(List<Section> sections) {
+        // Validate that all materials have valid topic IDs
+        Set<Integer> textbookIds = sections.stream()
+                .map(Section::getTextbookId)
+                .collect(Collectors.toSet());
+
+        // Check if all topics exist
+        for (Integer textbookId : textbookIds) {
+            if (!textbookRepository.existsByTextbookId(textbookId)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        String.format("Textbook with id %s not found", textbookId));
+            }
         }
-        if (sectionRepository.existsBySectionId(section.getSectionId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Section with this ID already exists");
-        }
-        Section savedSection = sectionRepository.save(section);
-        return convertToDTO(savedSection);
+
+        // Save all materials
+        List<Section> savedSections = sectionRepository.saveAll(sections);
+
+        // Convert and return DTOs
+        return savedSections.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public SectionDTO update(String id, Section section) {
-        if (!sectionRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found");
+    public SectionDTO update(String id, Section updatedSection) {
+        // Find the existing section
+        Section existingSection = sectionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found"));
+
+        if (updatedSection.getTextbookId() != null) {
+            if (!textbookRepository.existsByTextbookId(updatedSection.getTextbookId())) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found");
+            }
+            existingSection.setTextbookId(updatedSection.getTextbookId());
         }
-        if (!textbookRepository.existsByTextbookId(section.getTextbookId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found");
+        if (updatedSection.getSectionId() != null) {
+            existingSection.setSectionId(updatedSection.getSectionId());
         }
-        section.setId(id);
-        Section updatedSection = sectionRepository.save(section);
-        return convertToDTO(updatedSection);
+        if (updatedSection.getTitle() != null) {
+            existingSection.setTitle(updatedSection.getTitle());
+        }
+        if (updatedSection.getBookNo() != null) {
+            existingSection.setBookNo(updatedSection.getBookNo());
+        }
+
+        Section savedSection = sectionRepository.save(existingSection);
+        return convertToDTO(savedSection);
     }
 
     @Override
