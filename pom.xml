@@ -10,7 +10,7 @@
     </parent>
     <groupId>lt.mknyga</groupId>
     <artifactId>textbooks</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>textbook_service</name>
     <description>textbook_service</description>
     <url/>
