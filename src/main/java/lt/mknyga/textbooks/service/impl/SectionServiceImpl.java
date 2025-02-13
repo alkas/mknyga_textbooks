@@ -5,6 +5,7 @@ import lt.mknyga.textbooks.model.Section;
 import lt.mknyga.textbooks.repository.SectionRepository;
 import lt.mknyga.textbooks.repository.TextbookRepository;
 import lt.mknyga.textbooks.service.SectionService;
+import lt.mknyga.textbooks.util.DTOConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,11 +18,14 @@ import java.util.stream.Collectors;
 public class SectionServiceImpl implements SectionService {
     private final SectionRepository sectionRepository;
     private final TextbookRepository textbookRepository;
+    private final DTOConverter dtoConverter;
 
     public SectionServiceImpl(SectionRepository sectionRepository,
-                              TextbookRepository textbookRepository) {
+                              TextbookRepository textbookRepository,
+                              DTOConverter dtoConverter) {
         this.sectionRepository = sectionRepository;
         this.textbookRepository = textbookRepository;
+        this.dtoConverter = dtoConverter;
     }
 
     @Override
@@ -29,16 +33,16 @@ public class SectionServiceImpl implements SectionService {
         if (!textbookRepository.existsByTextbookId(textbookId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found");
         }
-        return sectionRepository.findByTextbookId(textbookId)
+        return sectionRepository.findAllByTextbookId(textbookId)
                 .stream()
-                .map(this::convertToDTO)
+                .map(dtoConverter::convertToSectionDTO)
                 .collect(Collectors.toList());
     }
 
     public SectionDTO findBySectionId(Integer sectionId) {
         Section section = sectionRepository.findBySectionId(sectionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found"));
-        return convertToDTO(section);
+        return dtoConverter.convertToSectionDTO(section);
     }
 
     @Override
@@ -61,7 +65,7 @@ public class SectionServiceImpl implements SectionService {
 
         // Convert and return DTOs
         return savedSections.stream()
-                .map(this::convertToDTO)
+                .map(dtoConverter::convertToSectionDTO)
                 .collect(Collectors.toList());
     }
 
@@ -88,7 +92,7 @@ public class SectionServiceImpl implements SectionService {
         }
 
         Section savedSection = sectionRepository.save(existingSection);
-        return convertToDTO(savedSection);
+        return dtoConverter.convertToSectionDTO(savedSection);
     }
 
     @Override
@@ -99,13 +103,4 @@ public class SectionServiceImpl implements SectionService {
         sectionRepository.deleteById(id);
     }
 
-    private SectionDTO convertToDTO(Section section) {
-        SectionDTO dto = new SectionDTO();
-        dto.setId(section.getId());
-        dto.setSectionId(section.getSectionId());
-        dto.setTextbookId(section.getTextbookId());
-        dto.setTitle(section.getTitle());
-        dto.setBookNo(section.getBookNo());
-        return dto;
-    }
 }
