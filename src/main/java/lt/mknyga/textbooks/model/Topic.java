@@ -1,8 +1,8 @@
 package lt.mknyga.textbooks.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -10,53 +10,23 @@ import java.util.List;
 public class Topic {
     @Id
     private String id;
-    @Field("topic_id")
+    @Indexed(unique = true)
     private Integer topicId;
-    @Field("textbook_id")
+    @Indexed
     private Integer textbookId;
-    @Field("section_id")
+    @Indexed
     private Integer sectionId;
-    private List<String> achievements;
-    private List<String> competencies;
-    private List<String> criteria;
+    private String achievements;
+    private String competencies;
+    private String criteria;
     private Integer lessons;
-    private List<Material> materials;
     private List<String> pages;
     private List<String> practice;
-    private List<String> tasks;
+    private String tasks;
     private String title;
 
     // Default constructor
     public Topic() {}
-
-    // Material inner class
-    public static class Material {
-        private String type;
-        private String desc;
-        private List<String> resources;
-
-        // Getters
-        public String getType() {
-            return type;
-        }
-        public String getDesc() {
-            return desc;
-        }
-        public List<String> getResources() {
-            return resources;
-        }
-
-        // Setters
-        public void setType(String type) {
-            this.type = type;
-        }
-        public void setDesc(String desc) {
-            this.desc = desc;
-        }
-        public void setResources(List<String> resources) {
-            this.resources = resources;
-        }
-    }
 
     // Getters
     public String getId() {
@@ -84,19 +54,16 @@ public class Topic {
         return practice;
     }
 
-    public List<Material> getMaterials() {
-        return materials;
-    }
-    public List<String> getCompetencies() {
+    public String getCompetencies() {
         return competencies;
     }
-    public List<String> getAchievements() {
+    public String getAchievements() {
         return achievements;
     }
-    public List<String> getTasks() {
+    public String getTasks() {
         return tasks;
     }
-    public List<String> getCriteria() {
+    public String getCriteria() {
         return criteria;
     }
 
@@ -126,19 +93,16 @@ public class Topic {
         this.practice = practice;
     }
 
-    public void setMaterials(List<Material> materials) {
-        this.materials = materials;
-    }
-    public void setCompetencies(List<String> competencies) {
+    public void setCompetencies(String competencies) {
         this.competencies = competencies;
     }
-    public void setAchievements(List<String> achievements) {
+    public void setAchievements(String achievements) {
         this.achievements = achievements;
     }
-    public void setTasks(List<String> tasks) {
+    public void setTasks(String tasks) {
         this.tasks = tasks;
     }
-    public void setCriteria(List<String> criteria) {
+    public void setCriteria(String criteria) {
         this.criteria = criteria;
     }
 }

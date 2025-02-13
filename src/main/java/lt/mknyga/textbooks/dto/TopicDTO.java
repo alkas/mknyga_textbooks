@@ -11,41 +11,13 @@ public class TopicDTO {
     private Integer lessons;
     private List<String> pages;
     private List<String> practice;
-    private List<MaterialDTO> materials;
-    private List<String> competencies;
-    private List<String> achievements;
-    private List<String> tasks;
-    private List<String> criteria;
+    private String competencies;
+    private String achievements;
+    private String tasks;
+    private String criteria;
     private TextbookDTO textbook;
     private SectionDTO section;
-
-    public static class MaterialDTO {
-        private String type;
-        private String desc;
-        private List<String> resources;
-
-        // Getters
-        public String getType() {
-            return type;
-        }
-        public String getDesc() {
-            return desc;
-        }
-        public List<String> getResources() {
-            return resources;
-        }
-
-        // Setters
-        public void setType(String type) {
-            this.type = type;
-        }
-        public void setDesc(String desc) {
-            this.desc = desc;
-        }
-        public void setResources(List<String> resources) {
-            this.resources = resources;
-        }
-    }
+    private List<MaterialDTO> materials;
 
     // Getters
     public String getId() {
@@ -63,32 +35,28 @@ public class TopicDTO {
     public String getTitle() {
         return title;
     }
-    public Integer getLessons() {
-        return lessons;
-    }
+    public Integer getLessons() { return lessons; }
     public List<String> getPages() {
         return pages;
     }
     public List<String> getPractice() {
         return practice;
     }
-    public List<MaterialDTO> getMaterials() {
-        return materials;
-    }
-    public List<String> getCompetencies() {
+    public String getCompetencies() {
         return competencies;
     }
-    public List<String> getAchievements() {
+    public String getAchievements() {
         return achievements;
     }
-    public List<String> getTasks() {
+    public String getTasks() {
         return tasks;
     }
-    public List<String> getCriteria() {
+    public String getCriteria() {
         return criteria;
     }
     public TextbookDTO getTextbook() { return textbook; }
     public SectionDTO getSection() { return section; }
+    public List<MaterialDTO> getMaterials() { return materials; }
 
     // Setters
     public void setId(String id) {
@@ -115,19 +83,17 @@ public class TopicDTO {
     public void setPractice(List<String> practice) {
         this.practice = practice;
     }
-    public void setMaterials(List<MaterialDTO> materials) {
-        this.materials = materials;
-    }
-    public void setCompetencies(List<String> competencies) { this.competencies = competencies; }
-    public void setAchievements(List<String> achievements) {
+    public void setCompetencies(String competencies) { this.competencies = competencies; }
+    public void setAchievements(String achievements) {
         this.achievements = achievements;
     }
-    public void setTasks(List<String> tasks) {
+    public void setTasks(String tasks) {
         this.tasks = tasks;
     }
-    public void setCriteria(List<String> criteria) {
+    public void setCriteria(String criteria) {
         this.criteria = criteria;
     }
     public void setTextbook(TextbookDTO textbook) { this.textbook = textbook; }
     public void setSection(SectionDTO section) { this.section = section; }
+    public void setMaterials(List<MaterialDTO> materials) { this.materials = materials; }
 }

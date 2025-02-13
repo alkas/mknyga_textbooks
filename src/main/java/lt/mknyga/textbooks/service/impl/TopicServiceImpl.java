@@ -2,32 +2,44 @@ package lt.mknyga.textbooks.service.impl;
 
 import lt.mknyga.textbooks.dto.TopicDTO;
 import lt.mknyga.textbooks.dto.TopicListDTO;
+import lt.mknyga.textbooks.model.Material;
 import lt.mknyga.textbooks.model.Section;
 import lt.mknyga.textbooks.model.Textbook;
 import lt.mknyga.textbooks.model.Topic;
+import lt.mknyga.textbooks.repository.MaterialRepository;
 import lt.mknyga.textbooks.repository.SectionRepository;
 import lt.mknyga.textbooks.repository.TextbookRepository;
 import lt.mknyga.textbooks.repository.TopicRepository;
 import lt.mknyga.textbooks.service.TopicService;
+import lt.mknyga.textbooks.util.DTOConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class TopicServiceImpl implements TopicService {
     private final TopicRepository topicRepository;
     private final SectionRepository sectionRepository;
     private final TextbookRepository textbookRepository;
+    private final MaterialRepository materialRepository;
+    private final DTOConverter dtoConverter;
+
 
     public TopicServiceImpl(TopicRepository topicRepository,
                             SectionRepository sectionRepository,
-                            TextbookRepository textbookRepository) {
+                            TextbookRepository textbookRepository,
+                            MaterialRepository materialRepository,
+                            DTOConverter dtoConverter) {
         this.topicRepository = topicRepository;
         this.sectionRepository = sectionRepository;
         this.textbookRepository = textbookRepository;
+        this.materialRepository = materialRepository;
+        this.dtoConverter = dtoConverter;
     }
 
     @Override
@@ -35,9 +47,9 @@ public class TopicServiceImpl implements TopicService {
         if (!textbookRepository.existsByTextbookId(textbookId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Textbook not found");
         }
-        return topicRepository.findByTextbookId(textbookId)
+        return topicRepository.findAllByTextbookId(textbookId)
                 .stream()
-                .map(this::convertToListDTO)
+                .map(dtoConverter::convertToTopicListDTO)
                 .collect(Collectors.toList());
     }
 
@@ -46,63 +58,83 @@ public class TopicServiceImpl implements TopicService {
         if (!sectionRepository.existsBySectionId(sectionId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found");
         }
-        return topicRepository.findBySectionId(sectionId)
+        return topicRepository.findAllBySectionId(sectionId)
                 .stream()
-                .map(this::convertToListDTO)
+                .map(dtoConverter::convertToTopicListDTO)
                 .collect(Collectors.toList());
     }
+
     @Override
     public TopicDTO findByTopicId(Integer topicId) {
-        //System.out.println("Getting topic by id: " + id);
         Topic topic = topicRepository.findByTopicId(topicId)
-                .orElseThrow(() -> {
-                    System.out.println("Topic npot found by id: " + topicId);
-                    return new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Topic not found");
-                        });
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Topic not found"));
 
         Section section = sectionRepository.findBySectionId(topic.getSectionId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Section not found"));
 
-        Textbook textbook = textbookRepository.findByTextbookId(section.getTextbookId())
+        Textbook textbook = textbookRepository.findByTextbookId(topic.getTextbookId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Textbook not found"));
 
-        return convertToDTO(topic, section, textbook);
+        List<Material> materials = materialRepository.findAllByTopicId(topicId);
+
+        return dtoConverter.convertToTopicDTO(topic, materials, section, textbook);
     }
 
     @Override
     public TopicDTO create(Topic topic) {
-        Section section = sectionRepository.findBySectionId(topic.getSectionId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Section not found"));
 
-        Textbook textbook = textbookRepository.findByTextbookId(section.getTextbookId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Textbook not found"));
-
+        if (topicRepository.existsByTopicId(topic.getTopicId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Topic with this id already exists");
+        }
         Topic savedTopic = topicRepository.save(topic);
-        return convertToDTO(savedTopic, section, textbook);
+        return dtoConverter.convertToTopicDTO(savedTopic, null, null, null);
     }
 
     @Override
-    public TopicDTO update(String id, Topic topic) {
-        if (!topicRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found");
+    public TopicDTO update(String id, Topic updatedTopic) {
+
+        Topic existingTopic = topicRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+
+        if (updatedTopic.getTopicId() != null) {
+            existingTopic.setTopicId(updatedTopic.getTopicId());
+        }
+        if (updatedTopic.getSectionId() != null) {
+            existingTopic.setSectionId(updatedTopic.getSectionId());
+        }
+        if (updatedTopic.getTextbookId() != null) {
+            existingTopic.setTextbookId(updatedTopic.getTextbookId());
+        }
+        if (updatedTopic.getTitle() != null) {
+            existingTopic.setTitle(updatedTopic.getTitle());
+        }
+        if (updatedTopic.getPages() != null) {
+            existingTopic.setPages(updatedTopic.getPages());
+        }
+        if (updatedTopic.getPractice() != null) {
+            existingTopic.setPractice(updatedTopic.getPractice());
+        }
+        if (updatedTopic.getLessons() != null) {
+            existingTopic.setLessons(updatedTopic.getLessons());
+        }
+        if (updatedTopic.getAchievements() != null) {
+            existingTopic.setAchievements(updatedTopic.getAchievements());
+        }
+        if (updatedTopic.getCompetencies() != null) {
+            existingTopic.setCompetencies(updatedTopic.getCompetencies());
+        }
+        if (updatedTopic.getCriteria() != null) {
+            existingTopic.setCriteria(updatedTopic.getCriteria());
+        }
+        if (updatedTopic.getTasks() != null) {
+            existingTopic.setTasks(updatedTopic.getTasks());
         }
 
-        Section section = sectionRepository.findBySectionId(topic.getSectionId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Section not found"));
-
-        Textbook textbook = textbookRepository.findByTextbookId(section.getTextbookId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Textbook not found"));
-
-        topic.setId(id);
-        Topic updatedTopic = topicRepository.save(topic);
-        return convertToDTO(updatedTopic, section, textbook);
+        Topic savedTopic = topicRepository.save(existingTopic);
+        return dtoConverter.convertToTopicDTO(savedTopic, null, null, null);
     }
 
     @Override
@@ -112,52 +144,5 @@ public class TopicServiceImpl implements TopicService {
         }
         topicRepository.deleteById(id);
     }
-
-    private TopicListDTO convertToListDTO(Topic topic) {
-        TopicListDTO dto = new TopicListDTO();
-        // Basic topic fields
-        dto.setId(topic.getId());
-        dto.setTopicId(topic.getTopicId());
-        dto.setTitle(topic.getTitle());
-        dto.setPages(topic.getPages());
-        dto.setPractice(topic.getPractice());
-        dto.setLessons(topic.getLessons());
-        return dto;
-    }
-
-    private TopicDTO convertToDTO(Topic topic, Section section, Textbook textbook) {
-        TopicDTO dto = new TopicDTO();
-        // Basic topic fields
-        dto.setId(topic.getId());
-        dto.setTopicId(topic.getTopicId());
-        dto.setTextbookId(topic.getTextbookId());
-        dto.setSectionId(topic.getSectionId());
-        dto.setTitle(topic.getTitle());
-        dto.setPages(topic.getPages());
-        dto.setPractice(topic.getPractice());
-        dto.setLessons(topic.getLessons());
-        dto.setAchievements(topic.getAchievements());
-        dto.setCompetencies(topic.getCompetencies());
-        dto.setCriteria(topic.getCriteria());
-        dto.setTasks(topic.getTasks());
-
-        // Convert materials
-        if (topic.getMaterials() != null) {
-            dto.setMaterials(topic.getMaterials().stream()
-                    .map(this::convertToMaterialDTO)
-                    .collect(Collectors.toList()));
-        }
-
-        return dto;
-    }
-
-    private TopicDTO.MaterialDTO convertToMaterialDTO(Topic.Material material) {
-        TopicDTO.MaterialDTO dto = new TopicDTO.MaterialDTO();
-        dto.setType(material.getType());
-        dto.setDesc(material.getDesc());
-        dto.setResources(material.getResources());
-        return dto;
-    }
-
 
 }
